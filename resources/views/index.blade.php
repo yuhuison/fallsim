@@ -1,18 +1,54 @@
 <!doctype html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=2.0, user-scalable=yes">
     <meta charset="utf-8">
     <title>im-chat</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="{{asset('/asset/layui/css/layuiv2.css')}}" media="all">
     <style>
         .layui-edge{
             display: block;
         }
+        .waifu-tool{
+        color:#FFFFFF;
+        }
     </style>
+    <script>
+             if(window.screen.height>window.screen.width){
+         window.isMobile=true;
+         }else{
+         window.isMobile=false;
+         }
+       function LoadCss(path){
+  if(!path || path.length === 0){
+  throw new Error('argument "path" is required !');
+  }
+  var head = document.getElementsByTagName('head')[0];
+  var link = document.createElement('link');
+  link.href = path;
+  link.rel = 'stylesheet';
+  link.type = 'text/css';
+  head.appendChild(link);
+  }
+       function setBG(){
+         if(window.isMobile){
+         document.body.style.background = "url('https://yuhuison-1259460701.cos.ap-chengdu.myqcloud.com/06x.jpg')";
+         }else{
+         document.body.style.background = "url('https://yuhuison-1259460701.cos.ap-chengdu.myqcloud.com/06.jpg')";
+         }
+       }
+       if(window.isMobile==false){
+       LoadCss('{{asset('/asset/layui/css/layuiv2.css')}}');
+       }else{
+       LoadCss('{{asset('/asset/layui/css/layui.mobile.css')}}');
+       }
+    </script>
+    
+    <script type="text/javascript" src="{{asset('/asset/layui/jquery.js')}}"></script>
+
 </head>
-<body>
-<ul class="layui-nav" >
+<body onload="setBG()">
+<ul class="layui-nav" id="nav" >
     <li class="layui-nav-item" style="float: right;">
         <a href="javascript:;"><img src="{{ session('user')->avatar }}" class="layui-nav-img">{{ session('user')->username }}</a>
         <dl class="layui-nav-child">
@@ -20,17 +56,21 @@
         </dl>
     </li>
     <li class="layui-nav-item layui-this"><a href="/">首页</a></li>
-    <li class="layui-nav-item"><a target="_blank" href="https://github.com/cuigeg/workman">Github项目地址</a></li>
+     <li class="layui-nav-item"><a href="https://github.com/cuigeg/workman">原作者GitHub</a></li>
+      <li class="layui-nav-item"><a href="/">秋小十魔改版GitHub(敬请期待)</a></li>
 </ul>
-<script type="text/javascript" src="{{asset('/asset/layui/jquery.js')}}"></script>
+
 <script src="{{asset('/asset/layui/layui.js')}}"></script>
 <script>
+        if(window.isMobile){
+          $('#nav').css("display","none");
+        }
         var socket;
         var ping;
         function sendMessage(socket, data){
             socket.send(data)
         }
-
+        if(window.isMobile==false){
         layui.use(['layim','element','upload'], function(layim){
             var element = layui.element;
             //基础配置
@@ -75,7 +115,7 @@
             setTimeout(function () {
                 //监听自定义工具栏点击，以添加代码为例
                 //建立websocket连接
-                socket = new WebSocket('ws://192.168.10.10:8282');
+                socket = new WebSocket('ws://47.94.8.40:8282');
                 socket.onopen = function(){
                     console.log("websocket is connected");
                     ping = setInterval(function () {
@@ -146,7 +186,6 @@
                     clearInterval(ping);
                 }
             },150);
-
             layim.on('sendMessage', function(res){
                 sendMessage(socket,JSON.stringify({
                     type: 'chatMessage' //随便定义，用于在服务端区分消息类型
@@ -195,9 +234,143 @@
                     }
                 }
             });
-
+            
+            
         });
+     }else{
+     
+                    layui.use('layer', function(){
+                window.layer= layui.layer;
+                });  
+     
+     
+     
+      $.ajax({url:"/userinfo",async:false,success:function(result){
+       window.userinfo=JSON.parse(result).data;
+    }});
+             layui.use('mobile', function(){
+               var mobile = layui.mobile,layim = mobile.layim;
+               layui.layim=layim;
+                 layim.config({ 
+                 
+                  isgroup : true,
+                  init: window.userinfo
+    
+                  //扩展“更多”的自定义列表，下文会做进一步介绍（如果无需扩展，剔除该项即可）
+                   ,moreList: [{
+                    alias: 'find'
+                    ,title: '添加新的好友/群'
+                    ,iconUnicode: '&#xe628;' //图标字体的unicode，可不填
+                      ,iconClass: '' //图标字体的class类名
+                    }]
+                  });
+                              setTimeout(function () {
+                //监听自定义工具栏点击，以添加代码为例
+                //建立websocket连接
+                socket = new WebSocket('ws://47.94.8.40:8282');
+                socket.onopen = function(){
+                    console.log("websocket is connected");
+                    ping = setInterval(function () {
+                        sendMessage(socket,'{"type":"ping"}');
+                    },1000 * 20);
+                    sendMessage(socket,JSON.stringify({
+                        type: 'login' //随便定义，用于在服务端区分消息类型
+                        ,sessionid: "{{ $sessionid }}"
+                        ,sessionname : "{{$sessionname}}"
+                    }));
+                };
+                socket.onmessage = function(res){
+                    data = JSON.parse(res.data);
+                    switch (data.type) {
+                        case "friend":
+                        case "group":
+                            console.log(data);
+                            layim.getMessage(data); //res.data即你发送消息传递的数据（阅读：监听发送的消息）
+                            break;
+                        //单纯的弹出
+                        case "layer":
+                            if (data.code === 200) {
+                                layer.msg(data.msg)
+                            } else if(data.code === 403){
+                                layer.msg(data.msg,{time:2*1000},function() {
+                                    window.location.href = '/loginout';
+                                });
+                            }else {
+                                layer.msg(data.msg,function(){})
+                            }
+                            break;
+                        //将新好友添加到列表
+                        case "addList":
+                            layim.setChatStatus('<span style="color:#FF5722;">在线</span>'); //模拟标注好友在线状态
+                            layim.addList(data.data);
+                            break;
+                        //好友上下线变更
+                        case "msgBox" :
+                            //为了等待页面加载，不然找不到消息盒子图标节点
+                            setTimeout(function(){
+                                if(data.count > 0){
+                                    layim.msgbox(data.count);
+                                }
+                            },1000);
+                            break;
+                        //token过期
+                        case "token_expire":
+                            window.location.reload();
+                            break;
+                        //加群提醒
+                        case "joinNotify":
+                            layim.getMessage(data.data);
+                            break;
+
+                    }
+                };
+                socket.onclose = function(){
+                    console.log("websocket is closed");
+                    clearInterval(ping);
+                }
+            },150);
+            layim.on('sendMessage', function(res){
+                sendMessage(socket,JSON.stringify({
+                    type: 'chatMessage' //随便定义，用于在服务端区分消息类型
+                    ,data: res
+                }));
+            });
+            layim.on('moreList', function(obj){
+              switch(obj.alias){ //alias即为上述配置对应的alias
+               case 'find': //发现
+                  console.log(layer);
+                  layer.open({
+                  type: 2, 
+                  content: '/find' //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+                  ,area: ['100%', '100%']
+                }); 
+               break;
+                   }
+              });        
+               layim.on('newFriend', function(){
+                  layer.open({
+                  type: 2, 
+                  content: '/message_box' //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+                  ,area: ['100%', '100%']
+                }); 
+  
+
+               });   
+                  
+                  
+                  
+                  
+                  
+                  
+                });
+                
+     }
 
 </script>
 </body>
+        <!-- 实现拖动效果，需引入 JQuery UI -->
+    <script src="{{asset('/asset/jquery-ui.min.js?v=1.12.1')}}"></script>
+    
+    <!-- 使用 aotuload.js 引入看板娘 -->
+    <script src="{{asset('/asset/autoload.js?v=1.4.2')}}"></script>
 </html>

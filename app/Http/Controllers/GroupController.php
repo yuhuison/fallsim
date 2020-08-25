@@ -20,10 +20,10 @@ class GroupController extends Controller
         $group_list = [];
         switch ($type) {
             case "user" :
-                $user_list = DB::table('user')->select('id','nickname','avatar')->where('id','like','%'.$wd.'%')->orWhere('nickname','like','%'.$wd.'%')->orWhere('username','like','%'.$wd.'%')->where('status',0)->paginate(6);
+                $user_list = DB::table('user')->select('id','nickname','avatar')->where('id','like','%'.$wd.'%')->orWhere('nickname','like','%'.$wd.'%')->orWhere('username','like','%'.$wd.'%')->where('status',3)->paginate(6);
                 break;
             case "group" :
-                $group_list = DB::table('group')->select('id','groupname','avatar')->where('id','like','%'.$wd.'%')->orWhere('groupname','like','%'.$wd.'%')->where('status',0)->paginate(6);
+                $group_list = DB::table('group')->select('id','groupname','avatar')->where('id','like','%'.$wd.'%')->orWhere('groupname','like','%'.$wd.'%')->where('status',3)->paginate(6);
                 break;
             default :
                 break;

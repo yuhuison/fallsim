@@ -19,8 +19,8 @@
         <div class="layui-tab-content">
             <div class="layui-tab-item @if($type == 'user' || $type == '')  layui-show @endif">
                 <div>
-                    <input  style="float: left;width: 90%;" type="text" id="user-wd" required lay-verify="required" placeholder="请输入ID/昵称" autocomplete="off" class="layui-input" @if($type == 'user') value="{{ $wd }}" @endif>
-                    <button onclick="findUser()" style="float: right;width: 10%"  class="layui-btn">
+                    <input  style="float: left;width: 100%;" type="text" id="user-wd" required lay-verify="required" placeholder="请输入ID/昵称" autocomplete="off" class="layui-input" @if($type == 'user') value="{{ $wd }}" @endif>
+                    <button onclick="findUser()" style="float: right;width: 40%"  class="layui-btn">
                         <i class="layui-icon">&#xe615;</i> 查找
                     </button>
                 </div>
@@ -48,12 +48,14 @@
                 @endif
             </div>
             <div class="layui-tab-item @if($type == 'group')  layui-show @endif">
+           
                 <div>
-                    <input  style="float: left;width: 80%;" type="text" id="group-wd" required lay-verify="required" placeholder="请输入群Id/群名称" autocomplete="off" class="layui-input" @if($type == 'group') value="{{ $wd }}" @endif>
-                    <button onclick="createGroup()" style="float: right;width: 10%"  class="layui-btn layui-btn-warm">
+                    <input  style="float: left;width: 100%;" type="text" id="group-wd" required lay-verify="required" placeholder="请输入群Id/群名称" autocomplete="off" class="layui-input" @if($type == 'group') value="{{ $wd }}" @endif>
+                     <br/>
+                    <button onclick="createGroup()" style="float: right;width: 40%;"  class="layui-btn layui-btn-warm">
                         <i class="layui-icon">&#xe654;</i> 创建群
                     </button>
-                    <button onclick="findGroup()" style="float: left;width: 10%;margin-left: 0"  class="layui-btn">
+                    <button onclick="findGroup()" style="float: left;width: 40%;margin-left: 0"  class="layui-btn">
                         <i class="layui-icon">&#xe615;</i> 查找群
                     </button>
                 </div>
@@ -159,7 +161,17 @@
 
         //创建群聊
         window.createGroup = function() {
-            layer.open({
+        if(window.screen.height>=window.screen.width){
+                    layer.open({
+                type: 2,
+                title: '创建群',
+                shadeClose: true,
+                shade: 0.8,
+                area: ['80%', '80%'],
+                content: '/create_group' //iframe的url
+            });
+        }else{
+                    layer.open({
                 type: 2,
                 title: '创建群',
                 shadeClose: true,
@@ -167,6 +179,8 @@
                 area: ['40%', '70%'],
                 content: '/create_group' //iframe的url
             });
+        }
+
         }
 
     });

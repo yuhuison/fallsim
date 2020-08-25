@@ -84,7 +84,7 @@ class IndexController extends Controller
             //将用户添加到所有人都在群
             DB::table('group_member')->insert([
                 'user_id' => $user_id,
-                'group_id' => 10001
+                'group_id' => 10017
             ]);
             return $this->responed_data(200,'注册成功');
         } else {
