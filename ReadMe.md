@@ -237,6 +237,12 @@ php artisan key:generate
 
 ### 6.测试项目运行
 
+启动项目 开启进程守护模式
+
+```
+php start.php start -d
+```
+
 浏览器访问 http://你的服务器IP地址
 
 ## 声明
