@@ -18,7 +18,7 @@ class Db
         'port' => '3306',
         'dbname' => 'im',
         'user' => 'root',
-        'password' => 'yuhuison',
+        'password' => 'yourpassword',
         'charset'  => 'utf8',
     );
 }
