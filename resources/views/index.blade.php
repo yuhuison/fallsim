@@ -100,7 +100,7 @@
     </li>
     <li class="layui-nav-item layui-this"><a href="/">首页</a></li>
      <li class="layui-nav-item"><a href="https://github.com/cuigeg/workman">原作者GitHub</a></li>
-      <li class="layui-nav-item"><a href="/">秋小十魔改版GitHub(敬请期待)</a></li>
+      <li class="layui-nav-item"><a href="https://github.com/yuhuison/fallsim">秋小十魔改版GitHub</a></li>
 </ul>
 
 <script src="{{asset('/asset/layui/layui.js')}}"></script>
