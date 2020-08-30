@@ -178,7 +178,7 @@ class Db
 
 ### 5.配置服务器
 
-配置 （/resources/views/index.blade.php）78行
+配置 （/resources/views/index.blade.php）166行 往下翻还有一个 共2个位置
 
 改为
 
