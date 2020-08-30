@@ -61,9 +61,19 @@ layim-mobile v2
 
 在阿里云轻量级应用服务器中选择 应用镜像为 **宝塔面板**，然后进入宝塔面板，软件商店，安装 **PHP7.2** , **nginx** , **Mysql**。
 
-进入宝塔面板，配置**PHP**禁用函数列表，将禁用函数列表全部清除。
+进入宝塔面板PHP配置，配置**PHP**禁用函数列表，将禁用函数列表全部清除。
 
-进入MYSQL配置，在配置项中加入跳过检测。
+进入宝塔面板MYSQL配置，在配置项中加入跳过检测。
+
+```
+在[mysqld]下添加 skip-grant-tables
+```
+
+配置PHP依赖环境为阿里云镜像
+
+```
+composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+```
 
 ### 2.下载项目
 
@@ -202,7 +212,28 @@ server {
 }
 ```
 
-修改PHP  fastcgi_pass 监听配置为 127.0.0.1:9000(自行在网上搜索)
+修改PHP  fastcgi_pass 监听配置为 127.0.0.1:9000
+
+宝塔面板文件搜索：php-fpm.conf: 
+
+将listen改为
+
+```
+listen = 127.0.0.1:9000
+```
+
+安装依赖
+
+```
+composer insatll
+```
+
+生成独立的key
+
+```
+php artisan key:generate
+```
+
 
 ### 6.测试项目运行
 
