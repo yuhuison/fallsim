@@ -215,6 +215,7 @@ server {
 修改PHP  fastcgi_pass 监听配置为 127.0.0.1:9000
 
 宝塔面板文件搜索：php-fpm.conf: 
+大概率在/www/server/php/72/etc/php-fpm.conf
 
 将listen改为
 
