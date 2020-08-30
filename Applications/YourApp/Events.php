@@ -128,7 +128,7 @@ class Events
                        'id' => $msg['data']['mine']['id'],
                        'type' => $msg['data']['to']['type'],
                        'content' => $msg['data']['mine']['content'],
-                       'cid' => 0,
+                       'cid' => $msg['data']['msgid'],
                        'mine'=> $_SESSION['auth']['id'] == $msg['data']['to']['id'] ? true : false,//要通过判断是否是我自己发的
                        'fromid' => $msg['data']['mine']['id'],
                        'timestamp' => time()*1000
@@ -143,7 +143,8 @@ class Events
                        'friend_id'     => $msg['data']['to']['id'],
                        'group_id'      => 0,
                        'content'       => $msg['data']['mine']['content'],
-                       'time'    => time()
+                       'time'    => time(),
+                       'msgid' => $msg['data']['msgid']
                    ];
                    self::$db->insert('im_chat_record')->cols($record_data)->query();
                    unset($record_data);
@@ -156,7 +157,7 @@ class Events
                        'id' => $msg['data']['to']['id'],
                        'type' => $msg['data']['to']['type'],
                        'content' => $msg['data']['mine']['content'],
-                       'cid' => 0,
+                       'cid' => $msg['data']['msgid'],
                        'mine'=> false,//要通过判断是否是我自己发的
                        'fromid' => $msg['data']['mine']['id'],
                        'timestamp' => time()*1000
@@ -181,7 +182,8 @@ class Events
                        'friend_id'     => 0,
                        'group_id'      => $msg['data']['to']['id'],
                        'content'       => $msg['data']['mine']['content'],
-                       'time'    => time()
+                       'time'    => time(),
+                       'msgid' => $msg['data']['msgid']
                    ];
                    self::$db->insert('im_chat_record')->cols($record_data)->query();
                }

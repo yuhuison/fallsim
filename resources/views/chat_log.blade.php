@@ -28,6 +28,7 @@
 <script type="text/javascript" src="{{asset('/asset/layui/jquery.js')}}"></script>
 <script src="{{asset('/asset/layui/layui.js')}}"></script>
 <script>
+    var msgs_has_del = new Array();
     layui.use(['layim', 'laytpl','laypage'], function(){
         var layim = layui.layim
             ,layer = layui.layer
@@ -44,7 +45,29 @@
                 data:{id:"{{ $id }}",type:"{{ $type }}",page:page},
                 dataType:"json",
                 success:function(res){
-                    console.log(res);
+                   
+                    var msgsdata=res.data.data;
+                    console.log(msgsdata);
+                    var index = 0;
+                    while(index!=-1){
+                        index=-1;
+                    	for (var i = 0; i < msgsdata.length; i++) {
+		                  	if(msgsdata[i].content=="%delMsg%"){
+		                  	   index=i;
+		                  	   msgs_has_del.push(msgsdata[i]);
+		                  	   msgsdata.splice(index,1);
+		                  	   break;
+		                  	}
+	                  	}
+                      
+                    }
+                    for (var i = 0; i < msgsdata.length; i++) {
+                        for(var delmsg of msgs_has_del){
+                            
+                        }
+	                 }
+                    
+                    res.data.data=msgsdata;
                     if (mark === 0){
                         //执行一个laypage实例
                         laypage.render({

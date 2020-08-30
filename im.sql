@@ -26,6 +26,7 @@ CREATE TABLE `im_chat_record` (
   `group_id` int(11) NOT NULL DEFAULT '0' COMMENT '如果不为0说明是群聊',
   `content` varchar(1000) NOT NULL DEFAULT '',
   `time` int(11) NOT NULL,
+  `msgid` varchar(30) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COMMENT='聊天记录';
 

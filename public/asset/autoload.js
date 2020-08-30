@@ -7,7 +7,7 @@
     if(window.isMobile==false){
      live2d_settings['modelId'] = 1;                  // 默认模型 ID
         live2d_settings['modelTexturesId'] = 87;         // 默认材质 ID
-        live2d_settings['modelStorage'] = false;         // 不储存模型 ID
+        live2d_settings['modelStorage'] = true;         // 不储存模型 ID
         live2d_settings['canTurnToHomePage'] = false;    // 隐藏 返回首页 按钮
         live2d_settings['waifuSize'] = '600x535';        // 看板娘大小
         live2d_settings['waifuTipsSize'] = '570x150';    // 提示框大小

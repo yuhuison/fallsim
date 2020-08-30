@@ -279,7 +279,7 @@ layui.define(["layer", "laytpl", "upload"],
                         }), e(document).off("mousedown", i).on("mousedown", i), e(window).off("resize", i).on("resize", i))
                     });
                 //好友群聊
-                x.find(".layim-list-group").on("contextmenu", "li",
+                x.find(".layim-chat-mine").on("contextmenu", "li",
                     function(a) {
                         var n = e(this),
                             l = '<ul data-index="' + n.attr('class').substr(11) + '"><li layim-event="AddGroup">新建群聊</li><li layim-event="EditGroup">修改群聊名称</li><li layim-event="DelGroup">解散群聊</li></ul>';
@@ -324,6 +324,34 @@ layui.define(["layer", "laytpl", "upload"],
                             }
                         }), e(document).off("mousedown", i).on("mousedown", i), e(window).off("resize", i).on("resize", i))
                     });
+                window.SetMsgTextMenu=function(msge){
+
+                	msge.on("contextmenu", "div",
+                    function(a) {
+
+                        var n = e(this),
+                            l = '<ul data-id="' +a.delegateTarget.dataset['cid']+ '"><li layim-event="delMsg">撤回消息</li><li layim-event="QuoteMsg">引用消息</li><li layim-event="atThis">@Ta</li></ul>';
+                        n.hasClass("layim-null") || (t.tips(l, this, {
+                            tips: 1,
+                            time: 0,
+                            anim: 5,
+                            fixed: !0,
+                            skin: "layui-box layui-layim-contextmenu",
+                            success: function(i) {
+                                var a = function(i) {
+                                    ii(i)
+                                };
+                                i.off("mousedown", a).on("mousedown", a);
+                                let top = n.offset().top;
+                                let left = n.offset().left;
+                                top -=  i[0].offsetHeight;
+                                i.css({'left':left + 'px','top':top + 'px'});
+                            }
+                        }), e(document).off("mousedown", i).on("mousedown", i), e(window).off("resize", i).on("resize", i));
+                        			return false;
+                    });
+                	
+                };
                 //好友分组下好友列表
                 x.find(".layim-list-friend  .layui-layim-list").on("contextmenu", "li",
                     function(a) {
@@ -645,15 +673,20 @@ layui.define(["layer", "laytpl", "upload"],
                     l = j.base.maxLength || 3e3;
                 if (i.content = a.textarea.val(), "" !== i.content.replace(/\s/g, "")) {
                     if (i.content.length > l) return t.msg("内容最长不能超过" + l + "个字符");
+                    a.data['cid']=msgid;
                     e.append(n(h).render(i));
+                    var msgid=window.userinfo["mine"].id+"m"+ (new Date()).valueOf().toString();
+                    
                     var s = {
                             mine: i,
-                            to: a.data
+                            to: a.data,
+                            cid:msgid
                         },
                         o = {
                             username: s.mine.username,
                             avatar: s.mine.avatar,
                             id: s.to.id,
+                            cid : msgid,
                             type: s.to.type,
                             content: s.mine.content,
                             timestamp: (new Date).getTime(),
@@ -1343,6 +1376,91 @@ layui.define(["layer", "laytpl", "upload"],
                     });
                     i.parent().parent().parent().remove();
                 },
+                QuoteMsg:function(i,a){
+                	var msgid= i.parent().attr('data-id').toString();
+                	var j = window.jqs("[data-cid='"+msgid+"']");
+                	window.qxs_QuoteString=j.find(".layim-chat-text").html();
+                	var qxs_nodes=jQuery.parseHTML(window.qxs_QuoteString);
+                	var QuoteHTML="";
+                	for(var node of qxs_nodes){
+                		console.log(node);
+                		if(node.nodeName.toLowerCase()=="#text"){
+                			QuoteHTML=QuoteHTML+node.data;
+                		}
+                		if(node.nodeName.toLowerCase()=="img"){
+                			if(node.alt!=undefined){
+                				QuoteHTML=QuoteHTML+"face"+node.alt+" ";
+                			}
+                		}
+                	}
+                	window.qxs_QuoteString=QuoteHTML;                	
+                	ai(_().textarea[0],'[pre class=layui-code]' +window.qxs_QuoteString + '[/pre]\n');
+                	 i.parent().parent().parent().remove();
+                },
+                delMsg:function(i,a){
+                	var msgid= i.parent().attr('data-id').toString();
+                	if(msgid.substr(0,5)!=window.userinfo.mine.id){
+                		layer.msg('您不能撤回别人发送的消息', {icon: 5});
+                	}else{
+                		var msgtime=msgid.substr(6,msgid.length-6);
+                		var nowtime=(new Date()).valueOf();
+                		if((nowtime-parseInt(msgtime))<120000){
+					        var local = layui.data('layim')[window.userinfo.mine.id]; 
+					        var to_id="";
+					        var to_type="";
+					        for(var mymsg of window.qxs_msgs_mine){
+					        	if(mymsg.cid==msgid){
+					        		to_id=mymsg.to.id.toString();
+					        		to_type=mymsg.to.type;
+					        	}
+					        }
+					        //console.log(window.qxs_msgs_mine);
+					        //console.log(local.chatlog);
+					        //console.log(to_id);
+					        if(local.chatlog!=undefined && to_id!=""){
+					        	for(var key in local.chatlog){
+					        		if(key==(to_type+to_id)){
+					        		 var smsg=local.chatlog[key];
+					        		 for(i_msg = 0; i_msg < smsg.length; i_msg++) { 
+					        		 	var msg_=smsg[smsg.length-i_msg-1];
+					        		 	if((nowtime-parseInt(msg_.timestamp))>120000){
+					        		 		break;
+					        		 	}else{
+					        		 		if(msg_.cid==msgid){
+					        		 			smsg.splice(smsg.length-i_msg-1,1);
+					        		 			local.chatlog[key]=smsg;
+					        		 			layui.data('layim', {
+					                            key: window.userinfo.mine.id
+					                             ,value: local
+					                            });
+					        		 			window.jqs("[data-cid='"+msgid+"'").hide();
+					        		 			window.delMsgById(msgid,msg_);
+					        		 			layer.msg('撤回成功！', {icon: 1});
+
+					        		 		}
+					        		 	}
+					        		 } 
+					        		break;
+					        		}
+
+					        	}
+					        }
+                		}else{
+                			layer.msg('您只能撤回两分钟内的消息', {icon: 5});
+                		}
+                	}
+                }
+                ,
+                atThis:function(i,a){
+                	var msgid= i.parent().attr('data-id').toString();
+                	var j = window.jqs("[data-cid='"+msgid+"']");
+                	var j=j.find(".layim-chat-user").find("cite");
+                	var o=j.find("i");
+                	
+                	ai(_().textarea[0],'[pre class=layui-atCode]' +"@ "+j.html().replace("<i>"+o.html()+"</i>","") + '[/pre] ');
+                	 i.parent().parent().parent().remove();
+                }
+                ,
                 //新增好友分组
                 AddFriendGroup:function(i,a){
                     //页面层

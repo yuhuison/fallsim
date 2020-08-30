@@ -66,6 +66,103 @@ layui.define(function (e) {
         for (var c in e) r[c] = e[c]
     }, o.v = "1.2.0", e("laytpl", o)
 });
+                window.SetMsgTextMenuM=function(msge,msgid){
+                	 var rtn_btn= layer.msg('要做什么', {
+                       time: 20000, //20s后自动关闭
+                        btn: ["取消",'撤回消息', '引用消息',"@ TA"],
+                        btn3:function(){
+                    var j = window.jqs("[data-cid='"+msgid+"']");
+                	window.qxs_QuoteString=j.find(".layim-chat-text").html();
+                	var qxs_nodes=jQuery.parseHTML(window.qxs_QuoteString);
+                	var QuoteHTML="";
+                        for(var node of qxs_nodes){
+                		console.log(node);
+                		if(node.nodeName.toLowerCase()=="#text"){
+                			QuoteHTML=QuoteHTML+node.data;
+                		}
+                		if(node.nodeName.toLowerCase()=="img"){
+                			if(node.alt!=undefined){
+                				QuoteHTML=QuoteHTML+"face"+node.alt+" ";
+                			  }
+                		   }
+                	     }
+                	        window.QuoteHTML=QuoteHTML;
+                        	window.jqs("#quote_content").html("引用消息:"+QuoteHTML.substr(0,6)+"...");
+                        	window.jqs(".layui-bottom-status-quote").show();
+                        	var mainchat=window.jqs('.layim-chat-main');
+                        	mainchat.scrollTop(mainchat[0].scrollHeight+1e3);
+                        },
+                      btn4:function(){
+                	     var j = window.jqs("[data-cid='"+msgid+"']");
+                	      var j=j.find(".layim-chat-user").find("cite");
+                	      var o=j.find("i");
+                      	  var itsname=j.html().replace("<i>"+o.html()+"</i>","");
+                      	  window.AtUserName=itsname;
+                      	    window.jqs("#at_content").html("@:"+itsname);
+                        	window.jqs(".layui-bottom-status-at").show();
+                        	var mainchat=window.jqs('.layim-chat-main');
+                        	mainchat.scrollTop(mainchat[0].scrollHeight+1e3);
+                      	
+                      },
+                      btn2:function(){
+                	if(msgid.substr(0,5)!=window.userinfo.mine.id){
+                		layer.msg('您不能撤回别人发送的消息', {icon: 5});
+                	}else{
+                		var msgtime=msgid.substr(6,msgid.length-6);
+                		var nowtime=(new Date()).valueOf();
+                		if((nowtime-parseInt(msgtime))<120000){
+					        var local = layui.data('layim-mobile')[window.userinfo.mine.id]; 
+					        console.log(local);
+					        var to_id="";
+					        var to_type="";
+					        for(var mymsg of window.qxs_msgs_mine){
+					        	if(mymsg.cid==msgid){
+					        		to_id=mymsg.to.id.toString();
+					        		to_type=mymsg.to.type;
+					        	}
+					        }
+					        //console.log(window.qxs_msgs_mine);
+					        //console.log(local.chatlog);
+					        //console.log(to_id);
+					        if(local.chatlog!=undefined && to_id!=""){
+					        	for(var key in local.chatlog){
+					        		if(key==(to_type+to_id)){
+					        		 var smsg=local.chatlog[key];
+					        		 for(i_msg = 0; i_msg < smsg.length; i_msg++) { 
+					        		 	var msg_=smsg[smsg.length-i_msg-1];
+					        		 	if((nowtime-parseInt(msg_.timestamp))>120000){
+					        		 		break;
+					        		 	}else{
+					        		 		if(msg_.cid==msgid){
+					        		 			smsg.splice(smsg.length-i_msg-1,1);
+					        		 			local.chatlog[key]=smsg;
+					        		 			layui.data('layim-mobile', {
+					                            key: window.userinfo.mine.id
+					                             ,value: local
+					                            });
+					        		 			window.jqs("[data-cid='"+msgid+"'").hide();
+					        		 			window.delMsgByIdM(msgid,msg_);
+					        		 			layer.msg('撤回成功！', {icon: 1});
+
+					        		 		}
+					        		 	}
+					        		 } 
+					        		break;
+					        		}
+
+					        	}
+					        }
+                		}else{
+                			layer.msg('您只能撤回两分钟内的消息', {icon: 5});
+                		}
+                	}                      	
+                      	
+                      }
+                        
+                         });
+                     
+                	
+                };
 layui.define(function (e) {
     "use strict";
     var t = (window, document),
@@ -1582,7 +1679,7 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
             '<li title="更多" layim-event="tab" lay-type="more"><i class="layui-icon"></i><span>更多</span><i class="layim-new" id="LAY_layimNewMore"></i></li>',
             "</ul>"].join(""),
         v = ['<div class="layim-chat layim-chat-{{d.data.type}}">', '<div class="layim-chat-main">',
-            "<ul></ul>", "</div>", '<div class="layim-chat-footer">',
+            "<ul></ul><div class='layui-bottom-status-quote'><span id='quote_content'></span><i class='layui-icon' style='float:right;position:relative;right:10px' onclick='window.jqs(this).parent().hide();'>&#x1006;</i></div><div class='layui-bottom-status-at'><span id='at_content'></span><i class='layui-icon' style='float:right;position:relative;right:10px' onclick='window.jqs(this).parent().hide();'>&#x1006;</i></div>", "</div>", '<div class="layim-chat-footer">',
             '<div class="layim-chat-send"><input type="text" autocomplete="off"><button class="layim-send layui-disabled" layim-event="send">发送</button></div>',
             '<div class="layim-chat-tool" data-json="{{encodeURIComponent(JSON.stringify(d.data))}}">',
             '<span class="layui-icon layim-tool-face" title="选择表情" layim-event="face"></span>',
@@ -1632,7 +1729,7 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
             return e ? '<a href="' + e + '" target="_blank">' + (a || e) + "</a>" : i
         }).replace(e(), "<$1 $2>").replace(e("/"), "</$1>").replace(/\n/g, "<br>")
     };
-    var b, x, w = ['<li class="layim-chat-li{{ d.mine ? " layim-chat-mine" : "" }}">',
+    var b, x, w = ['<li onclick="window.qxs_m_msg_click(this)" class="layim-chat-li{{ d.mine ? " layim-chat-mine" : "" }}" {{# if(d.cid){ }}data-cid="{{d.cid}}"{{# } }}>',
             '<div class="layim-chat-user"><img src="{{ d.avatar }}"><cite>', '{{ d.username||"佚名" }}',
             "</cite></div>", '<div class="layim-chat-text">{{ layui.data.content(d.content||" ") }}</div>',
             "</li>"].join(""),
@@ -1792,12 +1889,14 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
             a("#LAY_layimNew" + i)[e ? "addClass" : "removeClass"](o)
         },
         q = function () {
-            console.log('qqqq')
+            //console.log('qqqq')
+            var msgid=window.userinfo["mine"].id+"m"+ (new Date()).valueOf().toString();
             var i = {
                     username: C.mine ? C.mine.username : "访客",
                     avatar: C.mine ? C.mine.avatar : layui.cache.dir + "css/pc/layim/skin/logo.jpg",
                     id: C.mine ? C.mine.id : null,
-                    mine: !0
+                    mine: !0,
+                    cid:msgid
                 },
                 e = A(),
                 a = e.elem.find(".layim-chat-main ul"),
@@ -1805,13 +1904,24 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
                 s = C.base.maxLength || 3e3,
                 o = (new Date).getTime(),
                 c = e.textarea;
+                e.data['cid']=msgid;
+
             if (i.content = c.val(), "" !== i.content) {
                 if (i.content.length > s) return n.msg("内容最长不能超过" + s + "个字符");
+                    if(window.jqs(".layui-bottom-status-quote").css("display")!="none"){
+                	i.content="[pre class=layui-code]"+window.QuoteHTML+"[/pre]"+i.content;
+                	window.jqs(".layui-bottom-status-quote").hide();
+                    }
+                    if(window.jqs(".layui-bottom-status-at").css("display")!="none"){
+                	i.content="[pre class=layui-atCode]"+"@ "+window.AtUserName+" [/pre]"+i.content;
+                	window.jqs(".layui-bottom-status-at").hide();
+                    }                    
                 o - (q.time || 0) > 6e4 && (a.append('<li class="layim-chat-system"><span>' + layui.data.date() +
                     "</span></li>"), q.time = o), a.append(t(w).render(i));
                 var d = {
                         mine: i,
-                        to: l
+                        to: l,
+                        cid:msgid
                     },
                     u = {
                         username: d.mine.username,
@@ -1820,9 +1930,11 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
                         type: l.type,
                         content: d.mine.content,
                         timestamp: o,
-                        mine: !0
+                        mine: !0,
+                        cid:msgid
                     };
                 F(u), layui.each(r.sendMessage, function (i, e) {
+                	
                     e && e(d)
                 }), l.content = i.content, H(l), J(), c.val(""), c.next().addClass("layui-disabled")
             }
@@ -1944,7 +2056,7 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
                 e = i.elem.find(".layim-chat-main"),
                 a = e.find("ul"),
                 t = a.children(".layim-chat-li");
-            if (t.length >= d) {
+            if (t.length >= 5) {
                 var n = t.eq(0);
                 n.prev().remove(), a.prev().hasClass("layim-chat-system") || a.before(
                     '<div class="layim-chat-system"><span layim-event="chatLog">查看更多记录</span></div>'), n.remove()
@@ -2069,7 +2181,7 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
                       
                       var xhr = new XMLHttpRequest();
                       xhr.open("post", url, true);
-                      
+                      xhr.setRequestHeader('X-CSRF-TOKEN',s.token);
                     //   //上传进度事件
                     //   xhr.upload.addEventListener("progress", function(result) {
                     //     if (result.lengthComputable) {
@@ -2082,12 +2194,9 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
                       xhr.addEventListener("readystatechange", function() {
                         var result = xhr;
                         if (result.status != 200) { //error
-                          console.log('上传失败', result.status, result.statusText, result.response);
                         } 
                         else if (result.readyState == 4) { //finished
-                          console.log('上传成功', result);
                           var i= JSON.parse(result.response)
-
                           0 == i.code ? (i.data = i.data || {}, "images" === ee ? R(t.textarea[0],
                             "img[" + (i.data.src || "") + "]") : "file" === ee && R(t.textarea[
                             0], "file(" + (i.data.src || "") + ")[" + (i.data.name ||
@@ -2095,7 +2204,6 @@ layui.define(["laytpl", "upload-mobile", "layer-mobile", "zepto"], function (i) 
                         }
                       });
                       xhr.send(form); //开始上传
-                      console.log('form',form)
 
                        }
 

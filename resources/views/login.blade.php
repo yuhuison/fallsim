@@ -16,7 +16,6 @@
 <div class="container demo-1">
     <div class="content">
         <div id="large-header" class="large-header">
-            <canvas id="demo-canvas"></canvas>
             <div class="logo_box">
                 <form action="#" name="f" method="post">
                     <input type="password" style="position:absolute;top:-999px"/>
