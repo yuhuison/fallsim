@@ -10,7 +10,7 @@
 * 基于workerman的GatewayWorker框架开发的一款高性能支持分布式部署的聊天接口。
 * 支持 **PC网页端** 和 **手机网页端** 演示地址: http://47.94.8.40  （自动识别移动端/PC端）
 * PC端示例图
-* <img src="https://yuhuison-1259460701.cos.ap-chengdu.myqcloud.com/exp/t1.png" />
+* ![avatar](https://yuhuison-1259460701.cos.ap-chengdu.myqcloud.com/exp/t1.png)
 * 手机端示例图
 * 
 
